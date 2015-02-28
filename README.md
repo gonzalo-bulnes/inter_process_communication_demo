@@ -84,6 +84,11 @@ cd lib/02_signals
 ruby worker_on_demand.rb # multiple hook requests are handled by the worker
 ```
 
+### Named pipes and fork
+
+...
+
+
 References
 ----------
 
