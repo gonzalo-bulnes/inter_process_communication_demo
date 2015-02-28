@@ -27,9 +27,13 @@ bundle install
 
   [rvm]: https://rvm.io
 
-Create the _named pipes_ that will be used by `lib/main.rb` and `lib/worker.rb` to communicate:
+### Basic named pipes
+
+Create the _named pipes_ that will be used by `main.rb` and `worker.rb` to communicate:
 
 ```bash
+cd lib/01_basic_named_pipes
+
 # create a named pipe for the main program to notify
 # the worker about a hook to be performed
 mkfifo main_to_worker
@@ -48,10 +52,10 @@ In the fist scenario, the worker is waiting for hook requests:
 # Scenario 1
 
 # start the worker
-ruby lib/worker.rb # will wait until there is a hook to perform
+ruby worker.rb # will wait until there is a hook to perform
 
 # in a distinct terminal, start the main program
-ruby lib/main.rb # since the worker is available, the hook is performed immediately
+ruby main.rb # since the worker is available, the hook is performed immediately
 ```
 
 In the second scenario, the main program is waiting for workers to be available:
@@ -60,10 +64,10 @@ In the second scenario, the main program is waiting for workers to be available:
 # Scenario 2
 
 # start the main program
-ruby lib/main.rb # will wait until a wroker preforms the hook
+ruby main.rb # will wait until a wroker preforms the hook
 
 # in a distinct terminal, start the worker
-ruby lib/worker.rb # since a hook request was performed, performs the hook immediately
+ruby worker.rb # since a hook request was performed, performs the hook immediately
 ```
 
 References
