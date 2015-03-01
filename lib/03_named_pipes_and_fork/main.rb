@@ -2,6 +2,8 @@ require 'multi_json'
 
 puts 'Main program.'
 
+# Both named pipes were provides as command-line arguments
+
 def main_to_worker
   ARGV[0]
 end
@@ -11,6 +13,8 @@ def worker_to_main
 end
 
 puts "There is an available worker reading at #{main_to_worker} and writing at #{worker_to_main}."
+
+# Here is an example hook consisting in a message to be formatted by the worker.
 
 def delegate_hook_to_worker
   message = [
@@ -60,6 +64,8 @@ def delegate_hook_to_worker
     puts 'Hook failed.'
   end
 end
+
+# Multiple hooks can be processed by the worker.
 
 2.times do
   delegate_hook_to_worker
