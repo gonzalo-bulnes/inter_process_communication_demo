@@ -7,7 +7,7 @@ puts 'On-demand worker program.'
 # to the worker PID. One way to do that is providing the worker PID to
 # the main program when starting it.
 
-# TPerforming the worker tasks will require these methods.
+# Performing the worker tasks will require these methods.
 
 def format_message(body, options={})
   formatted_message = "\n"
@@ -58,10 +58,9 @@ if Signal.list.include? 'USR1'
 end
 
 # Start the main program.
-#
-# Contrary to the worker, which should not block the worker provider,
-# there is nothing more to do for the worker provider before
-# the main program exits. It will then wait for it.
+# There is nothing more to do for the worker before
+# the main program exits. It will then wait for a signal
+# until the main program exits.
 
 worker_pid = Process.pid
 command = "ruby main.rb #{worker_pid}"

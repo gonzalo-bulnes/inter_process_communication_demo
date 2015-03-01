@@ -3,19 +3,24 @@ require 'multi_json'
 
 puts 'Worker provider program.'
 
-# In order to play with signals, the main program needs to have access
-# to the worker PID. One way to do that is providing the worker PID to
-# the main program when starting it.
+# In order to send hook requests and receive the corresponding response,
+# the main program needs to have access to two named pipes.
+# One way to do that is providing them to the main program
+# as command-line aguments when starting it.
 
-# The worker will need these methods.
+# The worker will need those methods.
+
+# Both named pipes:
 
 def main_to_worker
-  "main_to_worker"
+  "main_to_worker" # the pipes are created in the current working directory
 end
 
 def worker_to_main
   "worker_to_main"
 end
+
+# The method to format the message:
 
 def format_message(body, options={})
   formatted_message = "\n"
@@ -24,6 +29,9 @@ def format_message(body, options={})
   end
   formatted_message += "----\n" + body
 end
+
+# And all operations that are required to handle a hook (including
+# reading and writing to the named pipes):
 
 def handle_hook_request
   input = open(main_to_worker, "r+") # the r+ means we don't block
@@ -46,12 +54,10 @@ def handle_hook_request
   output.flush
 end
 
-# Start a worker which will exit once after processing a hook
-# in behalf of the main program.
+# The following will a worker which will loop until the main program exits.
 #
 # Since the main program is not yet running, hence has emitted
-# no hook requests, the worker will wait. Yet the worker provider
-# continues.
+# no hook requests, the worker will wait. But the worker provider continues...
 
 worker_pid = fork do
   puts "Worker program. (PID: #{$$})"
@@ -60,12 +66,13 @@ worker_pid = fork do
   end
 end
 
-# Start the main program.
+# and starts the main program.
 #
 # Contrary to the worker, which should not block the worker provider,
 # there is nothing more to do for the worker provider before
 # the main program exits. It will then wait for it.
 
+# here are the named pipes as command-line arguments
 command = "ruby main.rb #{main_to_worker} #{worker_to_main}"
 # running ruby from system can look silly,
 # but the main program could not be a Ruby program.
