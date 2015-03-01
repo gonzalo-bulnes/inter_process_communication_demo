@@ -1,12 +1,20 @@
 Demo: Inter-process Communication
 =================================
 
-An example Ruby program that traps the USR1 signal and read to a named pipe, to be used as a proof of concept for inter-process commnication.
+An example Ruby program to be used as a proof of concept for inter-process commnication between a _main_ program which needs to delegate hooks processing and a _worker_ program which performs those hooks.
 
 Idea
 ----
 
-A program, let's call it _main_, is called from another which provides a _worker_ to perform hook that the main program requests.
+The first example uses [named pipes][np] to allow the _main_ program to delegate one hook to the _worker_.
+
+The second example was an attempt to use [signals][sig] to allow the _worker_ to peform multiple hooks depending on the _main_ program needs. The attempt failed.
+
+The third example succeeds at performing an arbitrary number of hooks by [forking][fork] the _worker_, thus allowing it to read from a _named pipe_ as long as the _main_ program is running.
+
+  [np]: https://en.wikipedia.org/wiki/Named_pipe
+  [sig]: https://en.wikipedia.org/wiki/Unix_signal
+  [fork]: https://en.wikipedia.org/wiki/Fork_%28system_call%29
 
 Usage
 -----
@@ -93,7 +101,7 @@ To be able to handle any number of hook requests, the worker must be able to loo
 In order to do so, let's introduce the `worker_provider` program. It will start a looping worker, then start the main program, and make sure the worker exits when the main program does. It will also provide both named pipes to both the worker and the main program.
 
 ```bash
-cd lib/02_named_pipes_and_fork
+cd lib/03_named_pipes_and_fork
 
 # start the worker provider program
 ruby worker_provider.rb # will start a worker and a main program with several hooks to perform
