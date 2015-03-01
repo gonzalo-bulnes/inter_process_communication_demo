@@ -9,6 +9,14 @@ puts 'Worker provider program.'
 
 # The worker will need these methods.
 
+def main_to_worker
+  "main_to_worker"
+end
+
+def worker_to_main
+  "worker_to_main"
+end
+
 def format_message(body, options={})
   formatted_message = "\n"
   options.each do |key, value|
@@ -18,7 +26,7 @@ def format_message(body, options={})
 end
 
 def handle_hook_request
-  input = open("main_to_worker", "r+") # the r+ means we don't block
+  input = open(main_to_worker, "r+") # the r+ means we don't block
   json_hook_request = input.gets # will block if there's nothing in the pipe
   hook_request = MultiJson.load(json_hook_request)
 
@@ -33,7 +41,7 @@ def handle_hook_request
   json_response = MultiJson.dump(response)
 
   # notify success or failure to the main program
-  output = open("worker_to_main", "w+") # the w+ means we don't block
+  output = open(worker_to_main, "w+") # the w+ means we don't block
   output.puts json_response
   output.flush
 end
@@ -47,7 +55,9 @@ end
 
 worker_pid = fork do
   puts "Worker program. (PID: #{$$})"
-  handle_hook_request
+  loop do
+    handle_hook_request
+  end
 end
 
 # Start the main program.
@@ -56,15 +66,14 @@ end
 # there is nothing more to do for the worker provider before
 # the main program exits. It will then wait for it.
 
-command = "ruby main.rb #{worker_pid}"
+command = "ruby main.rb #{main_to_worker} #{worker_to_main}"
 # running ruby from system can look silly,
 # but the main program could not be a Ruby program.
 exit_status = system(command)
 
-puts exit_status
 puts "\nMain program #{exit_status ? 'exited successfully.' : 'failed.'}"
 
-Process.wait(worker_pid) # make sure the worker exited before exiting
+Process.kill('TERM', worker_pid) # make sure the worker exited before exiting
 puts 'Worker exited.'
 
 # Both the main program and the worker exited, it's save to exit.
