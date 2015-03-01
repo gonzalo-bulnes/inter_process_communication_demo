@@ -27,9 +27,13 @@ bundle install
 
   [rvm]: https://rvm.io
 
-Create the _named pipes_ that will be used by `lib/main.rb` and `lib/worker.rb` to communicate:
+### Basic named pipes
+
+Create the _named pipes_ that will be used by `main.rb` and `worker.rb` to communicate:
 
 ```bash
+cd lib/01_basic_named_pipes
+
 # create a named pipe for the main program to notify
 # the worker about a hook to be performed
 mkfifo main_to_worker
@@ -48,10 +52,10 @@ In the fist scenario, the worker is waiting for hook requests:
 # Scenario 1
 
 # start the worker
-ruby lib/worker.rb # will wait until there is a hook to perform
+ruby worker.rb # will wait until there is a hook to perform
 
 # in a distinct terminal, start the main program
-ruby lib/main.rb # since the worker is available, the hook is performed immediately
+ruby main.rb # since the worker is available, the hook is performed immediately
 ```
 
 In the second scenario, the main program is waiting for workers to be available:
@@ -60,15 +64,33 @@ In the second scenario, the main program is waiting for workers to be available:
 # Scenario 2
 
 # start the main program
-ruby lib/main.rb # will wait until a wroker preforms the hook
+ruby main.rb # will wait until a wroker preforms the hook
 
 # in a distinct terminal, start the worker
-ruby lib/worker.rb # since a hook request was performed, performs the hook immediately
+ruby worker.rb # since a hook request was performed, performs the hook immediately
+```
+
+### Signals
+
+**Note**: Signals don't seem to be the way to go, see these [signals limitations][signals].
+
+The idea was having a `worker_on_demand`, which would start the `main` program (provinding its own PID to it).
+The main program would sent a signal each time a hook would need to be performed.
+
+```bash
+cd lib/02_signals
+
+# start
+ruby worker_on_demand.rb # multiple hook requests are handled by the worker
 ```
 
 References
 ----------
 
 - [Using Named Pipes in Ruby for Inter-process Communication][dix]
+- [Forking and IPC in Ruby, Part II][fk]
+
 
   [dix]: http://www.pauldix.net/2009/07/using-named-pipes-in-ruby-for-interprocess-communication.html
+  [fk]: http://www.sitepoint.com/forking-ipc-ruby-part-ii
+  [signals]: https://github.com/gonzalo-bulnes/inter_process_communication_demo/blob/add-signal-handling-to-handle-multiple-hooks/lib/02_signals/on_demand_worker.rb#L48-L56
