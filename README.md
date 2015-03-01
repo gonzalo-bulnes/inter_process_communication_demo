@@ -70,9 +70,27 @@ ruby main.rb # will wait until a wroker preforms the hook
 ruby worker.rb # since a hook request was performed, performs the hook immediately
 ```
 
+### Signals
+
+**Note**: Signals don't seem to be the way to go, see these [signals limitations][signals].
+
+The idea was having a `worker_on_demand`, which would start the `main` program (provinding its own PID to it).
+The main program would sent a signal each time a hook would need to be performed.
+
+```bash
+cd lib/02_signals
+
+# start
+ruby worker_on_demand.rb # multiple hook requests are handled by the worker
+```
+
 References
 ----------
 
 - [Using Named Pipes in Ruby for Inter-process Communication][dix]
+- [Forking and IPC in Ruby, Part II][fk]
+
 
   [dix]: http://www.pauldix.net/2009/07/using-named-pipes-in-ruby-for-interprocess-communication.html
+  [fk]: http://www.sitepoint.com/forking-ipc-ruby-part-ii
+  [signals]: https://github.com/gonzalo-bulnes/inter_process_communication_demo/blob/add-signal-handling-to-handle-multiple-hooks/lib/02_signals/on_demand_worker.rb#L48-L56
