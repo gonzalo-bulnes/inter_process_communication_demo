@@ -6,9 +6,7 @@ An example Ruby program that traps the USR1 signal and read to a named pipe, to 
 Idea
 ----
 
-A program, let's call it _main_, emits the USR1 signal, creates a named pipe (*hook_pipe*) then pauses.
-Another program traps that USR1 signal, performs some task, and write the result to the *hook_pipe*.
-The main program reads the result from the *hook_pipe* and resumes.
+A program, let's call it _main_, is called from another which provides a _worker_ to perform hook that the main program requests.
 
 Usage
 -----
@@ -84,13 +82,31 @@ cd lib/02_signals
 ruby worker_on_demand.rb # multiple hook requests are handled by the worker
 ```
 
+### Named pipes and fork
+
+The first example has two limitations:
+- only one hook request can be handled by the worker
+- the main program and the worker must agree on two named pipes to communicate
+
+To be able to handle any number of hook requests, the worker must be able to loop while the main program is running. Of course, it should exit once the main program has exited.
+
+In order to do so, let's introduce the `worker_provider` program. It will start a looping worker, then start the main program, and make sure the worker exits when the main program does. It will also provide both named pipes to both the worker and the main program.
+
+```bash
+cd lib/02_named_pipes_and_fork
+
+# start the worker provider program
+ruby worker_provider.rb # will start a worker and a main program with several hooks to perform
+```
+
 References
 ----------
 
 - [Using Named Pipes in Ruby for Inter-process Communication][dix]
+- [Ruby 2.2.0 documentation: Process][doc]
 - [Forking and IPC in Ruby, Part II][fk]
-
 
   [dix]: http://www.pauldix.net/2009/07/using-named-pipes-in-ruby-for-interprocess-communication.html
   [fk]: http://www.sitepoint.com/forking-ipc-ruby-part-ii
   [signals]: https://github.com/gonzalo-bulnes/inter_process_communication_demo/blob/add-signal-handling-to-handle-multiple-hooks/lib/02_signals/on_demand_worker.rb#L48-L56
+  [doc]: http://ruby-doc.org/core-2.2.0/Process.html
