@@ -101,7 +101,7 @@ To be able to handle any number of hook requests, the worker must be able to loo
 In order to do so, let's introduce the `worker_provider` program. It will start a looping worker, then start the main program, and make sure the worker exits when the main program does. It will also provide both named pipes to both the worker and the main program.
 
 ```bash
-cd lib/02_named_pipes_and_fork
+cd lib/03_named_pipes_and_fork
 
 # start the worker provider program
 ruby worker_provider.rb # will start a worker and a main program with several hooks to perform
